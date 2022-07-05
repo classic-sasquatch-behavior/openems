@@ -41,6 +41,8 @@ ENDIF()
 
 ADD_DEFINITIONS(-DGIT_VERSION=\"${VERSION}\")
 
+set(CMAKE_CXX_STANDARD 20)
+
 #
 # Set up RPATH for the project
 #
