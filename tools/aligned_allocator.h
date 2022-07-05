@@ -36,6 +36,11 @@ template <typename T, std::align_val_t N> struct aligned_allocator
 	using size_type = std::size_t;
 	using difference_type = std::ptrdiff_t;
 
+    template <typename U> struct rebind
+    {
+		using other = aligned_allocator<U, N>;
+	};
+
 	// Default constructor, copy constructor, rebinding constructor, and destructor.
 	// Empty for stateless allocators.
 	aligned_allocator() = default;
