@@ -34,20 +34,41 @@ struct Matrix{
 
     //destructor
     ~Matrix(){
-
+        delete host_data;
+        cudaFree(device_data);
     }
 
     //copy constructor
     Matrix(const Matrix<Type>& input){
+        num_dims = input.num_dims;
 
+        for(int i = 0; i < num_dims; i++){
+            dims[i] = input.dims[i];
+        }
+
+        allocate();
+        load(input.host_data);
     }
 
     //copy assignment operator
     void operator=(const Matrix<Type>& input){
+        num_dims = input.num_dims;
 
+        for(int i = 0; i < num_dims; i++){
+            dims[i] = input.dims[i];
+        }
+
+        load(input.host_data);
     }
 
+
     //-----memory-----
+    void load(Type* input){
+        for(int i = 0; i < bytesize(); i++){
+            host_data[i] = input[i];
+        }
+        upload();
+    }
 
     void allocate(){
         //allocate host_data (dont forget to delete it!)
@@ -55,9 +76,7 @@ struct Matrix{
 
         //allocate device_data (this gets deleted with cudaFree())
         //cuda safe call will be a macro which performs error checking (see cuda_macros.h)
-        CUDA_SAFE_CALL(
-            cudaMalloc((void**)&device_data, bytesize())
-            );
+        CUDA_SAFE_CALL( cudaMalloc((void**)&device_data, bytesize()) );
     }
 
     void upload(){
