@@ -6,6 +6,36 @@
 
 #include"cuda_macros.h"
 
+template<typename Type>
+struct Device_Ptr{
+
+    Type* data;
+
+    int dims[3] = {1,1,1};
+    int num_dims = 0;
+
+    __device__ __host__ inline int height() const {return dims[0];}
+    __device__ __host__ inline int width() const {return dims[1];}
+    __device__ __host__ inline int depth() const {return dims[2];}
+
+    __device__ __host__ inline int size(){return dims[0] * dims[1] * dims[2];}
+
+    //constructor
+    Device_Ptr(Matrix* parent){
+        data = parent->device_data;
+        num_dims = parent->num_dims;
+
+        for(int i = 0; i < num_dims; i++){
+            dims[i] = parent->dims[i];
+        }
+    }
+
+    Type& operator()(int row, int col = 0, int cbc = 0){
+        return data[(row * width() + col) * depth() + cbc];
+    }
+
+};
+
 
 template<typename Type>
 struct Matrix{
@@ -16,8 +46,24 @@ struct Matrix{
     int dims[3] = {1,1,1}
     int num_dims = 0;
 
+    __device__ __host__ inline int height() const {return dims[0];}
+    __device__ __host__ inline int width() const {return dims[1];}
+    __device__ __host__ inline int depth() const {return dims[2];}
+
     __device__ __host__ inline int size(){return dims[0] * dims[1] * dims[2];}
     __device__ __host__ inline int bytesize(){return size() * sizeof(Type);}
+
+
+    //-----data access-----
+
+    Type& operator()(int row, int col = 0, int cbc = 0){
+        return[(row * width() + col) * depth() + cbc];
+    }
+
+    //typecast to device
+    operator Device_Ptr<Type>(){
+        return Device_Ptr(this);
+    }
 
     //constructor
     Matrix(std::vector<int>_dims){
