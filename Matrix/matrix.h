@@ -64,9 +64,13 @@ struct Matrix{
 
     //-----memory-----
     void load(Type* input){
+        
+        //deep copy input data (which is assumed to be on the host)
         for(int i = 0; i < bytesize(); i++){
             host_data[i] = input[i];
         }
+
+        //upload newly copied data to device
         upload();
     }
 
@@ -80,11 +84,13 @@ struct Matrix{
     }
 
     void upload(){
-
+        //copy memory from host(CPU) to device(GPU)
+        cudaMemcpy(device_data, host_data, bytesize(), cudaMemcpyHostToDevice);
     }
 
     void download(){
-
+        //copy memory from device(GPU) to host(CPU)
+        cudaMemcpy(host_data, device_data, bytesize(), cudaMemcpyDeviceToHost);
     }
 
 
